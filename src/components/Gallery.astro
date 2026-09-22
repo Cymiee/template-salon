@@ -1,0 +1,33 @@
+---
+import { Image } from "astro:assets";
+
+import { site } from "../config/site";
+import { image } from "../lib/images";
+import Section from "./Section.astro";
+
+const photos = site.gallery.map((item) => ({ ...item, data: image(item.src) }));
+---
+
+<Section
+  id="gallery"
+  eyebrow="The salon"
+  heading="Gallery"
+  intro="A look at the room and some recent work."
+>
+  <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+    {
+      photos.map((photo, index) => (
+        <li class="reveal" style={`transition-delay:${Math.min(index, 5) * 60}ms`}>
+          <Image
+            src={photo.data}
+            alt={photo.alt}
+            widths={[320, 480, 640]}
+            sizes="(min-width: 1024px) 320px, 50vw"
+            loading="lazy"
+            class="aspect-[4/5] w-full rounded-sm object-cover transition-transform duration-500 hover:scale-[1.02]"
+          />
+        </li>
+      ))
+    }
+  </ul>
+</Section>

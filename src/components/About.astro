@@ -1,0 +1,44 @@
+---
+import { Image } from "astro:assets";
+
+import { site } from "../config/site";
+import { image } from "../lib/images";
+import Section from "./Section.astro";
+
+const photo = image("about.jpg");
+---
+
+<Section id="about" eyebrow="Our story" heading="About" centered={false}>
+  <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+    <div class="reveal order-2 lg:order-1">
+      <!-- ~65ch keeps the measure readable instead of running the full width. -->
+      <p class="max-w-[65ch] text-base leading-[1.8] text-ink/90 sm:text-lg">
+        {site.business.about}
+      </p>
+
+      <dl class="mt-10 grid grid-cols-2 gap-8 border-t border-line pt-8">
+        <div>
+          <dt class="eyebrow">Where</dt>
+          <dd class="mt-2 text-base text-ink">
+            {site.location.area}, {site.location.city}
+          </dd>
+        </div>
+        <div>
+          <dt class="eyebrow">Booking</dt>
+          <dd class="mt-2 text-base text-ink">WhatsApp or phone</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="reveal order-1 lg:order-2">
+      <Image
+        src={photo}
+        alt={`Inside ${site.business.name}`}
+        widths={[480, 720, 960]}
+        sizes="(min-width: 1024px) 480px, 100vw"
+        loading="lazy"
+        class="aspect-[4/3] w-full rounded-sm object-cover"
+      />
+    </div>
+  </div>
+</Section>

@@ -1,0 +1,232 @@
+---
+import { site } from "../config/site";
+import { whatsappLink } from "../lib/whatsapp";
+import Section from "./Section.astro";
+import WhatsAppIcon from "./WhatsAppIcon.astro";
+
+const accessKey = site.forms.web3formsKey;
+// Loud in dev, silent in the built site, so a forgotten key gets caught while
+// you are still working rather than by the client's first missed enquiry.
+const keyMissing =
+  import.meta.env.DEV &&
+  (!accessKey || accessKey === "YOUR-WEB3FORMS-ACCESS-KEY");
+
+const field =
+  "w-full rounded-sm border border-muted/70 bg-background px-4 py-3 text-base text-ink placeholder:text-muted/70 transition-colors focus:border-primary";
+const labelClass = "block text-sm font-medium text-ink";
+---
+
+<Section
+  id="contact"
+  eyebrow="Get in touch"
+  heading="Book or ask a question"
+  intro="WhatsApp is the fastest way to reach us. If you would rather write, the form goes straight to our inbox."
+>
+  <div class="grid gap-10 lg:grid-cols-5 lg:gap-14">
+    <!-- WhatsApp first: it is the channel we actually want people to use. -->
+    <aside class="reveal lg:col-span-2">
+      <div class="rounded-sm bg-surface p-7 sm:p-8">
+        <h3 class="font-heading text-2xl text-primary">Book on WhatsApp</h3>
+        <p class="mt-3 text-base leading-relaxed text-muted">
+          Send us a message and we will confirm your appointment, usually within
+          the hour during opening times.
+        </p>
+        <a
+          href={whatsappLink()}
+          target="_blank"
+          rel="noopener"
+          class="mt-6 inline-flex items-center gap-2.5 rounded-full bg-primary px-6 py-3.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+        >
+          <WhatsAppIcon class="h-4 w-4" />
+          Message us
+        </a>
+
+        <dl class="mt-8 space-y-4 border-t border-line pt-6 text-sm">
+          <div>
+            <dt class="text-muted">Phone</dt>
+            <dd class="mt-0.5">
+              <a
+                href={`tel:${site.contact.phone}`}
+                class="text-primary transition-opacity hover:opacity-70"
+              >
+                {site.contact.phoneDisplay}
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-muted">Email</dt>
+            <dd class="mt-0.5">
+              <a
+                href={`mailto:${site.contact.email}`}
+                class="break-all text-primary transition-opacity hover:opacity-70"
+              >
+                {site.contact.email}
+              </a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </aside>
+
+    <div class="reveal lg:col-span-3">
+      {
+        keyMissing && (
+          <p class="mb-6 rounded-sm border border-accent bg-surface p-4 text-sm text-ink">
+            <strong>Set your Web3Forms key.</strong> Put the client's access key
+            in <code>forms.web3formsKey</code> in src/config/site.ts, or this
+            form will not deliver. This notice only appears in development.
+          </p>
+        )
+      }
+
+      <!--
+        Plain HTML POST to Web3Forms is the baseline, so the form still works
+        with JavaScript disabled. The script below upgrades it to a fetch
+        submission with inline status, avoiding the redirect to web3forms.com.
+      -->
+      <form
+        action="https://api.web3forms.com/submit"
+        method="POST"
+        class="space-y-5"
+        data-contact-form
+      >
+        <input type="hidden" name="access_key" value={accessKey} />
+        <input
+          type="hidden"
+          name="subject"
+          value={`New enquiry from ${site.business.name} website`}
+        />
+        <input type="hidden" name="from_name" value={site.business.name} />
+
+        <!-- Web3Forms' honeypot: bots fill it, humans never see it. -->
+        <input
+          type="checkbox"
+          name="botcheck"
+          class="hidden"
+          style="display:none"
+          tabindex="-1"
+          autocomplete="off"
+          aria-hidden="true"
+        />
+
+        <div>
+          <label for="contact-name" class={labelClass}>Name</label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            required
+            autocomplete="name"
+            class={`mt-2 ${field}`}
+          />
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="contact-phone" class={labelClass}>Phone</label>
+            <input
+              id="contact-phone"
+              name="phone"
+              type="tel"
+              required
+              autocomplete="tel"
+              inputmode="tel"
+              class={`mt-2 ${field}`}
+            />
+          </div>
+          <div>
+            <label for="contact-email" class={labelClass}>
+              Email <span class="font-normal text-muted">(optional)</span>
+            </label>
+            <input
+              id="contact-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              class={`mt-2 ${field}`}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="contact-message" class={labelClass}>
+            What would you like booked?
+          </label>
+          <textarea
+            id="contact-message"
+            name="message"
+            rows="5"
+            required
+            class={`mt-2 ${field} resize-y`}></textarea>
+        </div>
+
+        <button
+          type="submit"
+          class="inline-flex w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60 sm:w-auto"
+          data-submit
+        >
+          Send enquiry
+        </button>
+
+        <!--
+          aria-live so the outcome is announced rather than only shown. It stays
+          in the DOM empty rather than being created on submit, because a region
+          added at the same moment as its text is often missed by screen readers.
+        -->
+        <p
+          class="min-h-[1.5rem] text-sm"
+          role="status"
+          aria-live="polite"
+          data-form-status
+        >
+        </p>
+      </form>
+    </div>
+  </div>
+</Section>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
+  const status = document.querySelector<HTMLElement>("[data-form-status]");
+  const button = document.querySelector<HTMLButtonElement>("[data-submit]");
+
+  if (form && status && button) {
+    const original = button.textContent;
+
+    form.addEventListener("submit", async (event) => {
+      // Let the browser show its own messages for empty required fields.
+      if (!form.reportValidity()) return;
+
+      event.preventDefault();
+      button.disabled = true;
+      button.textContent = "Sending…";
+      status.textContent = "";
+      status.className = "min-h-[1.5rem] text-sm";
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body: new FormData(form),
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          form.reset();
+          status.className = "min-h-[1.5rem] text-sm text-primary";
+          status.textContent =
+            "Thank you — your enquiry is with us. We will reply shortly.";
+        } else {
+          throw new Error(result.message ?? "Request failed");
+        }
+      } catch {
+        status.className = "min-h-[1.5rem] text-sm text-accent";
+        status.textContent =
+          "Sorry, that did not send. Please message us on WhatsApp instead.";
+      } finally {
+        button.disabled = false;
+        button.textContent = original;
+      }
+    });
+  }
+</script>

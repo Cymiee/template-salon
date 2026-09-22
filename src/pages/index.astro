@@ -2,8 +2,21 @@
 import { site } from "../config/site";
 import Base from "../layouts/Base.astro";
 import Hero from "../components/Hero.astro";
+import Services from "../components/Services.astro";
+import About from "../components/About.astro";
+import Gallery from "../components/Gallery.astro";
+import Testimonials from "../components/Testimonials.astro";
+import HoursLocation from "../components/HoursLocation.astro";
+import Contact from "../components/Contact.astro";
 ---
 
+{/* Each section is switched on or off in `sections` in src/config/site.ts. */}
 <Base>
   {site.sections.hero && <Hero />}
+  {site.sections.services && <Services />}
+  {site.sections.about && <About />}
+  {site.sections.gallery && <Gallery />}
+  {site.sections.testimonials && <Testimonials />}
+  {site.sections.hoursLocation && <HoursLocation />}
+  {site.sections.contact && <Contact />}
 </Base>

@@ -1,0 +1,41 @@
+---
+import { site } from "../config/site";
+import Base from "../layouts/Base.astro";
+import { whatsappLink } from "../lib/whatsapp";
+
+const title = `Page not found — ${site.business.name}`;
+---
+
+<Base title={title} description="That page does not exist." noindex>
+  <section
+    class="flex min-h-[70svh] items-center px-5 py-32 sm:px-8"
+  >
+    <div class="mx-auto w-full max-w-xl text-center">
+      <p class="eyebrow">404</p>
+      <h1 class="mt-4 text-[2.25rem] leading-tight text-primary sm:text-5xl">
+        We could not find that page
+      </h1>
+      <p class="mt-5 text-base leading-relaxed text-muted sm:text-lg">
+        The link may be out of date. Head back to the home page, or message us
+        and we will point you the right way.
+      </p>
+
+      <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+        <a
+          href="/"
+          class="inline-flex items-center justify-center rounded-full bg-primary px-7 py-4 text-sm font-medium text-background transition-opacity hover:opacity-90"
+        >
+          Back to home
+        </a>
+        <a
+          href={whatsappLink()}
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center justify-center rounded-full border border-line px-7 py-4 text-sm font-medium text-primary transition-colors hover:bg-surface"
+        >
+          Message us
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

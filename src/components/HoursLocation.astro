@@ -1,0 +1,117 @@
+---
+import { site } from "../config/site";
+import { formatRange } from "../lib/hours";
+import Section from "./Section.astro";
+
+const { location } = site;
+---
+
+<Section
+  id="visit"
+  eyebrow="Find us"
+  heading="Hours &amp; location"
+  centered={false}
+>
+  <div class="grid gap-10 lg:grid-cols-2 lg:gap-14">
+    <div class="reveal">
+      <h3 class="font-body text-xs font-medium uppercase tracking-[0.18em] text-accent">
+        Opening hours
+      </h3>
+
+      <!--
+        Each row carries its day name so the client script can mark today.
+        Today is resolved in the browser, never at build time: a page built on a
+        Tuesday must not tell a Friday visitor that Tuesday is today.
+      -->
+      <ul class="mt-5" data-hours>
+        {
+          site.hours.map((entry) => (
+            <li
+              class="flex items-baseline justify-between gap-4 border-b border-line/60 py-3 last:border-0"
+              data-day={entry.day.toLowerCase()}
+            >
+              <span class="text-base text-ink">{entry.day}</span>
+              <span
+                class:list={[
+                  "text-base tabular-nums",
+                  entry.closed ? "text-muted" : "text-ink",
+                ]}
+              >
+                {formatRange(entry)}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="mt-10 font-body text-xs font-medium uppercase tracking-[0.18em] text-accent">
+        Address
+      </h3>
+      <address class="mt-4 space-y-1 text-base not-italic leading-relaxed text-ink">
+        <p>{location.addressLine}</p>
+        <p>{location.city}, {location.country}</p>
+      </address>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a
+          href={location.directionsUrl}
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
+        >
+          <svg
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"></path>
+            <circle cx="12" cy="10" r="2.6"></circle>
+          </svg>
+          Get directions
+        </a>
+        <a
+          href={`tel:${site.contact.phone}`}
+          class="inline-flex items-center rounded-full border border-line px-6 py-3 text-sm font-medium text-primary transition-colors hover:bg-surface"
+        >
+          {site.contact.phoneDisplay}
+        </a>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <!-- The one third-party embed on the page. `loading="lazy"` keeps it off
+           the critical path; it sits below the fold on every phone. -->
+      <iframe
+        src={location.mapEmbedUrl}
+        title={`Map showing ${site.business.name} in ${location.area}`}
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        class="aspect-[4/3] w-full rounded-sm border border-line lg:aspect-auto lg:h-full lg:min-h-[420px]"
+      ></iframe>
+    </div>
+  </div>
+</Section>
+
+<script>
+  // Mark today's row. Runs in the browser so a statically built page still
+  // highlights the correct day for whoever is reading it.
+  const list = document.querySelector("[data-hours]");
+  if (list) {
+    const today = new Date()
+      .toLocaleDateString("en-US", { weekday: "long" })
+      .toLowerCase();
+    const row = list.querySelector(`[data-day="${today}"]`);
+    if (row) {
+      row.classList.add("font-medium");
+      const label = document.createElement("span");
+      label.className = "ms-2 text-xs uppercase tracking-wider text-accent";
+      label.textContent = "Today";
+      row.firstElementChild?.append(label);
+    }
+  }
+</script>

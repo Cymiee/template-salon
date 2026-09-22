@@ -1,0 +1,73 @@
+---
+import { site } from "../config/site";
+import { whatsappLink } from "../lib/whatsapp";
+import Section from "./Section.astro";
+
+const categories = site.services.filter((c) => c.items.length > 0);
+---
+
+<Section
+  id="services"
+  eyebrow="Price menu"
+  heading="Services"
+  intro="Every price includes a consultation. Treatments are booked one at a time so no chair is ever rushed."
+  surface
+>
+  <div class="space-y-16 sm:space-y-20">
+    {
+      categories.map((category) => (
+        <div class="reveal">
+          <h3
+            class="border-b border-line pb-4 text-2xl text-primary sm:text-[1.75rem]"
+          >
+            {category.category}
+          </h3>
+
+          <ul class="mt-2">
+            {category.items.map((item) => (
+              <li class="border-b border-line/60 py-5 last:border-0">
+                {/*
+                  Two columns from the smallest screen up: the price is the thing
+                  people scan for, so it stays pinned right instead of wrapping
+                  underneath the name.
+                */}
+                <div class="flex items-baseline justify-between gap-4">
+                  <h4 class="font-body text-base font-medium leading-snug text-ink">
+                    {item.name}
+                  </h4>
+                  <p class="shrink-0 font-body text-base tabular-nums text-primary">
+                    <span class="text-xs text-muted">AED</span> {item.price}
+                  </p>
+                </div>
+
+                <p class="mt-1 text-sm text-muted">
+                  {item.duration}
+                  {item.description && (
+                    <>
+                      <span class="mx-2 text-line" aria-hidden="true">
+                        ·
+                      </span>
+                      {item.description}
+                    </>
+                  )}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+
+  <p class="reveal mt-14 text-center text-sm text-muted">
+    Prices are a guide — long or very thick hair may need extra time.{" "}
+    <a
+      href={whatsappLink("Hi, I'd like a quote for my hair")}
+      target="_blank"
+      rel="noopener"
+      class="whitespace-nowrap text-primary underline underline-offset-4 transition-opacity hover:opacity-70"
+    >
+      Ask for a quote
+    </a>
+  </p>
+</Section>
