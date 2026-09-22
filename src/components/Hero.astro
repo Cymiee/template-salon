@@ -1,0 +1,76 @@
+---
+import { Image } from "astro:assets";
+
+import { site } from "../config/site";
+import { image } from "../lib/images";
+import { whatsappLink } from "../lib/whatsapp";
+import WhatsAppIcon from "./WhatsAppIcon.astro";
+
+const hero = image("hero.jpg");
+const booking = whatsappLink();
+---
+
+<section id="top" class="relative isolate flex min-h-[88svh] items-end overflow-hidden sm:min-h-screen">
+  <!--
+    The LCP element. `loading="eager"` + `fetchpriority="high"` keep it off the
+    lazy queue, and the explicit widths stop Astro shipping a 2000px file to a
+    360px phone.
+  -->
+  <Image
+    src={hero}
+    alt=""
+    widths={[640, 960, 1280, 1920]}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+    decoding="sync"
+    class="absolute inset-0 -z-10 h-full w-full object-cover"
+    aria-hidden="true"
+  />
+
+  <!-- Two stacked scrims: a base wash for overall legibility and a stronger
+       bottom gradient where the text actually sits. -->
+  <div class="absolute inset-0 -z-10 bg-primary/20" aria-hidden="true"></div>
+  <div
+    class="absolute inset-x-0 bottom-0 -z-10 h-3/4 bg-gradient-to-t from-primary via-primary/75 to-transparent"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="mx-auto w-full max-w-5xl px-5 pb-16 pt-32 sm:px-8 sm:pb-24 lg:pb-28">
+    <p class="eyebrow mb-5 text-background/85">
+      {site.location.area} · {site.location.city}
+    </p>
+
+    <h1 class="max-w-3xl text-[2.75rem] leading-[1.05] text-background sm:text-6xl lg:text-7xl">
+      {site.business.name}
+    </h1>
+
+    <p class="mt-5 max-w-lg text-lg leading-relaxed text-background/85 sm:text-xl">
+      {site.business.tagline}
+    </p>
+
+    <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <a
+        href={booking}
+        target="_blank"
+        rel="noopener"
+        class="inline-flex items-center justify-center gap-2.5 rounded-full bg-background px-7 py-4 text-sm font-medium text-primary transition-opacity hover:opacity-90"
+      >
+        <WhatsAppIcon class="h-4.5 w-4.5" />
+        Book on WhatsApp
+      </a>
+
+      {
+        site.sections.services && (
+          <a
+            href="#services"
+            class="inline-flex items-center justify-center rounded-full border border-background/40 px-7 py-4 text-sm font-medium text-background transition-colors hover:bg-background/10"
+          >
+            View services &amp; prices
+          </a>
+        )
+      }
+    </div>
+  </div>
+</section>

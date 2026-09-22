@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/*
+ * Brand tokens.
+ *
+ * The `--brand-*` variables are written onto <html> by Base.astro straight from
+ * src/config/site.ts. This block is the only place they are mapped to Tailwind
+ * utilities, so components use `bg-primary` / `text-muted` / `border-line` and
+ * never mention a hex code. Change a colour in the config and everything follows.
+ */
+@theme inline {
+  --color-primary: var(--brand-primary);
+  --color-accent: var(--brand-accent);
+  --color-background: var(--brand-background);
+  --color-surface: var(--brand-surface);
+  --color-ink: var(--brand-text);
+  --color-muted: var(--brand-muted);
+  --color-line: var(--brand-border);
+
+  --font-heading: var(--brand-font-heading);
+  --font-body: var(--brand-font-body);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Sticky nav is 4rem tall; keep anchored headings clear of it. */
+    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    /* Slightly open body text reads better on small warm-toned screens. */
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    line-height: 1.12;
+    /* Large serif display text needs to be pulled in a touch. */
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* One visible focus treatment for every interactive element on the site. */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Only suppress the ring for mouse users, never for keyboard users. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer components {
+  /*
+   * Scroll reveal. Elements start slightly low and transparent; a tiny
+   * IntersectionObserver in Base.astro adds `.is-visible`. If JS never runs,
+   * `.reveal` is still fully visible, because the hiding is applied by a class
+   * the script itself adds (`.js-reveal` on <html>).
+   */
+  .js-reveal .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .js-reveal .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Small caps label used above every section heading. */
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Reveals become instant rather than animated — content still appears. */
+  .js-reveal .reveal,
+  .js-reveal .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

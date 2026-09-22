@@ -1,0 +1,9 @@
+---
+import { site } from "../config/site";
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+---
+
+<Base>
+  {site.sections.hero && <Hero />}
+</Base>

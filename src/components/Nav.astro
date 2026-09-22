@@ -1,0 +1,185 @@
+---
+import { Image } from "astro:assets";
+
+import { site } from "../config/site";
+import { image } from "../lib/images";
+import { navLinks } from "../lib/nav";
+import { whatsappLink } from "../lib/whatsapp";
+import WhatsAppIcon from "./WhatsAppIcon.astro";
+
+const links = navLinks();
+const logo = image(site.business.logo);
+const booking = whatsappLink();
+---
+
+<header
+  id="site-nav"
+  class="fixed inset-x-0 top-0 z-50 border-b border-transparent transition-[background-color,border-color,backdrop-filter] duration-300"
+  data-nav
+>
+  <div class="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 sm:px-8 lg:h-20">
+    <!-- Brand -->
+    <a
+      href="#top"
+      class="flex items-center gap-2.5 text-primary"
+      aria-label={`${site.business.name} — back to top`}
+    >
+      <Image
+        src={logo}
+        alt=""
+        width={28}
+        height={28}
+        loading="eager"
+        class="h-7 w-7 shrink-0"
+        aria-hidden="true"
+      />
+      <span class="font-heading text-lg leading-none tracking-tight sm:text-xl">
+        {site.business.shortName}
+      </span>
+    </a>
+
+    <!-- Desktop links -->
+    <nav aria-label="Main" class="hidden lg:block">
+      <ul class="flex items-center gap-8">
+        {
+          links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-sm text-ink/80 transition-colors hover:text-primary"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a
+        href={booking}
+        target="_blank"
+        rel="noopener"
+        class="hidden items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90 sm:inline-flex"
+      >
+        <WhatsAppIcon class="h-4 w-4" />
+        Book on WhatsApp
+      </a>
+
+      <!-- Mobile menu toggle -->
+      <button
+        type="button"
+        id="nav-toggle"
+        aria-expanded="false"
+        aria-controls="nav-panel"
+        class="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-primary lg:hidden"
+      >
+        <span class="sr-only">Open menu</span>
+        <svg
+          class="h-6 w-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M4 7h16M4 12h16M4 17h16" data-icon-open></path>
+          <path d="M6 6l12 12M18 6L6 18" class="hidden" data-icon-close></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile panel -->
+  <div
+    id="nav-panel"
+    hidden
+    class="border-t border-line bg-background lg:hidden"
+  >
+    <nav aria-label="Mobile" class="px-5 py-5 sm:px-8">
+      <ul class="flex flex-col">
+        {
+          links.map((link) => (
+            <li class="border-b border-line/70 last:border-0">
+              <a
+                href={link.href}
+                class="block py-3.5 font-heading text-2xl text-primary"
+                data-nav-link
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a
+        href={booking}
+        target="_blank"
+        rel="noopener"
+        class="mt-6 flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-medium text-background"
+        data-nav-link
+      >
+        <WhatsAppIcon class="h-4 w-4" />
+        Book on WhatsApp
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>("[data-nav]");
+  const toggle = document.getElementById("nav-toggle");
+  const panel = document.getElementById("nav-panel");
+  const iconOpen = document.querySelector<SVGPathElement>("[data-icon-open]");
+  const iconClose = document.querySelector<SVGPathElement>("[data-icon-close]");
+
+  if (header && toggle && panel && iconOpen && iconClose) {
+    const label = toggle.querySelector("span");
+
+    const setOpen = (open: boolean) => {
+      panel.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+      iconOpen.classList.toggle("hidden", open);
+      iconClose.classList.toggle("hidden", !open);
+      if (label) label.textContent = open ? "Close menu" : "Open menu";
+      // Stop the page scrolling behind an open full-width panel.
+      document.body.style.overflow = open ? "hidden" : "";
+    };
+
+    const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
+
+    toggle.addEventListener("click", () => setOpen(!isOpen()));
+
+    // Tapping a link navigates to the anchor, so close up behind it.
+    panel.querySelectorAll("[data-nav-link]").forEach((link) => {
+      link.addEventListener("click", () => setOpen(false));
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && isOpen()) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+
+    // Back to a desktop width with the panel open would trap the scroll lock.
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    desktop.addEventListener("change", (event) => {
+      if (event.matches && isOpen()) setOpen(false);
+    });
+
+    // The nav sits transparent over the hero, then gains a background once the
+    // page scrolls, so it never competes with the hero image.
+    const onScroll = () => {
+      const scrolled = window.scrollY > 24;
+      header.classList.toggle("bg-background/90", scrolled);
+      header.classList.toggle("backdrop-blur-md", scrolled);
+      header.classList.toggle("border-line", scrolled);
+      header.classList.toggle("border-transparent", !scrolled);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
+</script>

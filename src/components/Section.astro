@@ -1,0 +1,77 @@
+---
+/**
+ * Shared wrapper for every section on the page.
+ *
+ * It owns vertical rhythm, the max width, and the eyebrow/heading pattern, so
+ * spacing stays consistent everywhere and is tuned in exactly one file.
+ */
+interface Props {
+  /** Anchor target, e.g. "services". Matches the nav links. */
+  id: string;
+  /** Small caps label above the heading. */
+  eyebrow?: string;
+  /** Section heading. Omit for sections that supply their own. */
+  heading?: string;
+  /** Short line under the heading. */
+  intro?: string;
+  /** Paint the band in the surface colour to separate it from its neighbours. */
+  surface?: boolean;
+  /** Centre the heading block. Off for text-led sections like About. */
+  centered?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  eyebrow,
+  heading,
+  intro,
+  surface = false,
+  centered = true,
+  class: className = "",
+} = Astro.props;
+---
+
+<section
+  id={id}
+  aria-labelledby={heading ? `${id}-heading` : undefined}
+  class:list={[
+    "scroll-mt-20 px-5 py-20 sm:px-8 sm:py-24 lg:py-32",
+    surface ? "bg-surface" : "bg-background",
+    className,
+  ]}
+>
+  <div class="mx-auto w-full max-w-5xl">
+    {
+      (eyebrow || heading || intro) && (
+        <header
+          class:list={[
+            "reveal mb-12 sm:mb-16",
+            centered ? "text-center" : "max-w-2xl",
+          ]}
+        >
+          {eyebrow && <p class="eyebrow mb-4">{eyebrow}</p>}
+          {heading && (
+            <h2
+              id={`${id}-heading`}
+              class="text-[2rem] leading-tight sm:text-[2.75rem] lg:text-5xl"
+            >
+              {heading}
+            </h2>
+          )}
+          {intro && (
+            <p
+              class:list={[
+                "mt-5 text-base leading-relaxed text-muted sm:text-lg",
+                centered ? "mx-auto max-w-xl" : "max-w-xl",
+              ]}
+            >
+              {intro}
+            </p>
+          )}
+        </header>
+      )
+    }
+    <slot />
+  </div>
+</section>

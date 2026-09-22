@@ -1,0 +1,197 @@
+---
+import { site } from "../config/site";
+import { image } from "../lib/images";
+import { openingHoursSpecification, priceRange } from "../lib/hours";
+import { instagramUrl } from "../lib/whatsapp";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import WhatsAppFab from "../components/WhatsAppFab.astro";
+import "../styles/global.css";
+
+interface Props {
+  /** Overrides `seo.title`. Used by 404 and any page you add later. */
+  title?: string;
+  description?: string;
+  /** Search engines should skip utility pages like 404. */
+  noindex?: boolean;
+}
+
+const { title, description, noindex = false } = Astro.props;
+
+const pageTitle = title ?? site.seo.title;
+const pageDescription = description ?? site.seo.description;
+const canonical = new URL(Astro.url.pathname, site.seo.siteUrl).href;
+const ogImage = new URL(site.seo.ogImage, site.seo.siteUrl).href;
+
+// Written onto <html> so every Tailwind colour utility resolves from the config.
+// See the @theme inline block in src/styles/global.css for the mapping.
+const brandVars = [
+  `--brand-primary:${site.brand.primary}`,
+  `--brand-accent:${site.brand.accent}`,
+  `--brand-background:${site.brand.background}`,
+  `--brand-surface:${site.brand.surface}`,
+  `--brand-text:${site.brand.text}`,
+  `--brand-muted:${site.brand.muted}`,
+  `--brand-border:${site.brand.border}`,
+  `--brand-font-heading:'${site.fonts.heading}',Georgia,'Times New Roman',serif`,
+  `--brand-font-body:'${site.fonts.body}',system-ui,-apple-system,sans-serif`,
+].join(";");
+
+// BeautySalon is a LocalBusiness subtype, so it inherits address, hours and
+// rating while telling Google exactly what kind of business this is.
+const ratings = site.testimonials.map((t) => t.rating);
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BeautySalon",
+  "@id": `${site.seo.siteUrl}/#business`,
+  name: site.business.name,
+  description: site.seo.description,
+  url: site.seo.siteUrl,
+  image: ogImage,
+  logo: new URL(image(site.business.logo).src, site.seo.siteUrl).href,
+  telephone: site.contact.phone,
+  email: site.contact.email,
+  priceRange: priceRange(),
+  currenciesAccepted: "AED",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: site.location.addressLine,
+    addressLocality: site.location.city,
+    addressRegion: site.location.area,
+    addressCountry: site.location.country,
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: site.location.geo.lat,
+    longitude: site.location.geo.lng,
+  },
+  openingHoursSpecification: openingHoursSpecification(),
+  sameAs: [instagramUrl()],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Services",
+    itemListElement: site.services.map((category) => ({
+      "@type": "OfferCatalog",
+      name: category.category,
+      itemListElement: category.items.map((item) => ({
+        "@type": "Offer",
+        priceCurrency: "AED",
+        price: item.price,
+        itemOffered: { "@type": "Service", name: item.name },
+      })),
+    })),
+  },
+  ...(ratings.length > 0 && {
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1),
+      reviewCount: ratings.length,
+      bestRating: 5,
+      worstRating: 1,
+    },
+  }),
+  review: site.testimonials.map((t) => ({
+    "@type": "Review",
+    author: { "@type": "Person", name: t.name },
+    reviewRating: {
+      "@type": "Rating",
+      ratingValue: t.rating,
+      bestRating: 5,
+      worstRating: 1,
+    },
+    reviewBody: t.text,
+  })),
+};
+---
+
+<!doctype html>
+<html lang={site.seo.lang} dir={site.seo.dir} style={brandVars}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <meta name="theme-color" content={site.brand.primary} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- Open Graph / Twitter: what a WhatsApp or Instagram share preview uses. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.business.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={site.seo.locale} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Fonts come from one config string. preconnect shaves the extra DNS +
+         TLS round trip that a cold 4G connection would otherwise pay. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={site.fonts.googleFontsUrl} />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(jsonLd)}
+      is:inline
+    />
+  </head>
+
+  <body class="bg-background text-ink antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary focus:px-5 focus:py-3 focus:text-sm focus:font-medium focus:text-background"
+    >
+      Skip to content
+    </a>
+
+    {site.sections.nav && <Nav />}
+
+    <main id="main">
+      <slot />
+    </main>
+
+    {site.sections.footer && <Footer />}
+    {site.sections.whatsappFab && <WhatsAppFab />}
+
+    <script is:inline>
+      // Add the hiding class only once JS is confirmed running, so a failed or
+      // blocked script can never leave the page invisible.
+      document.documentElement.classList.add("js-reveal");
+
+      const reveal = () => {
+        const targets = document.querySelectorAll(".reveal");
+        if (!("IntersectionObserver" in window)) {
+          targets.forEach((el) => el.classList.add("is-visible"));
+          return;
+        }
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            });
+          },
+          { rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
+        );
+        targets.forEach((el) => observer.observe(el));
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", reveal, { once: true });
+      } else {
+        reveal();
+      }
+    </script>
+  </body>
+</html>
