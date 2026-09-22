@@ -86,6 +86,7 @@ The file is numbered 1–13. Go in order — every field is documented in
 
 | # | Block | What to do |
 |---|---|---|
+| 0 | `demo` | Leave it `false`. Only the public demo deployment turns it on, and it does that with an environment variable. |
 | 1 | `business` | Name, tagline, 2–3 sentence about text. |
 | 2 | `brand` | Six hex values. **Read the contrast note below before choosing.** |
 | 3 | `fonts` | Pick a pair on [fonts.google.com](https://fonts.google.com), click *Get embed code*, paste the `<link href="...">` URL into `googleFontsUrl`, and put the two family names in `heading` and `body`. Keep `&display=swap`. |
@@ -224,6 +225,48 @@ Things worth saying out loud, because they save arguments later:
   it is what keeps it fast and free to host.
 - Their domain renewal is their own bill, not yours.
 - Hosting on Vercel's free tier is genuinely free at this traffic level.
+
+---
+
+## Deploying the public demo
+
+This is the showcase you send to prospective clients — a live URL they can open
+on their phone. It is the template repo itself, deployed as-is.
+
+Deploy it on Vercel like any client site (step 7 above), then set **two
+environment variables** in the Vercel project (Settings → Environment Variables):
+
+| Variable | Value |
+|---|---|
+| `DEMO` | `1` |
+| `SITE_URL` | your deployment's URL, e.g. `https://template-salon.vercel.app` |
+
+Redeploy after adding them.
+
+`DEMO=1` does four things, all of them about not lying to Google or to visitors:
+
+- adds `<meta name="robots" content="noindex">` and makes `robots.txt` disallow
+  everything, so a fictional salon never competes for real Jumeirah searches;
+- publishes no sitemap;
+- drops `aggregateRating` and `Review` from the structured data — invented
+  reviews should not assert a star rating;
+- adds "Demo site — sample content for a fictional salon" to the footer.
+
+`SITE_URL` overrides `seo.siteUrl` at build time, so canonical tags, the OG
+image and share previews point at the address the demo actually lives on
+instead of the placeholder domain in the config.
+
+**Why an environment variable and not a config flag.** If demo mode lived only in
+`site.ts`, every client repo cloned from this template would start with it set,
+and one forgotten line would ship a paying client's site as `noindex` — quietly
+destroying their search presence with nothing visibly wrong. A client clone has
+no `DEMO` variable, so it cannot inherit the mistake. The build also prints a
+loud warning whenever demo mode is on.
+
+**Expected Lighthouse on the demo:** Performance 100 · Accessibility 100 · Best
+Practices 100 · **SEO 69**. The SEO score is low *because* the page is
+deliberately blocked from indexing — that single audit is worth ~31 points. The
+client build, which is what actually matters, scores 100 across all four.
 
 ---
 

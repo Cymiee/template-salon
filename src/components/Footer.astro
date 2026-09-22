@@ -3,6 +3,7 @@ import { site } from "../config/site";
 import { formatRange } from "../lib/hours";
 import { navLinks } from "../lib/nav";
 import { instagramUrl, whatsappLink } from "../lib/whatsapp";
+import { isDemo } from "../lib/demo";
 
 const links = navLinks();
 const year = new Date().getFullYear();
@@ -111,7 +112,18 @@ const closedDays = site.hours.filter((h) => h.closed);
     <div
       class="mt-8 flex flex-col gap-2 border-t border-background/15 pt-8 text-xs text-background/65 sm:flex-row sm:items-center sm:justify-between"
     >
-      <p>© {year} {site.business.name}. All rights reserved.</p>
+      <p>
+        © {year} {site.business.name}. All rights reserved.
+        {
+          /* Says plainly that the content is invented, so nobody reads the
+             sample reviews or prices as belonging to a real salon. */
+          isDemo && (
+            <span class="ms-1 text-background/65">
+              Demo site — sample content for a fictional salon.
+            </span>
+          )
+        }
+      </p>
       {
         site.footer.credit && (
           <p>

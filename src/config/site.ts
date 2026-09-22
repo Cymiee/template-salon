@@ -12,6 +12,12 @@ import type { SiteConfig } from "../types/site";
  * ─────────────────────────────────────────────────────────────────────────────
  */
 export const site: SiteConfig = {
+  // 0 ── Demo mode ------------------------------------------------------------
+  // Leave false for every real client. The public showcase deployment switches
+  // it on with a DEMO=1 environment variable, so a client site can never be
+  // shipped as noindex by accident.
+  demo: false,
+
   // 1 ── Business -------------------------------------------------------------
   business: {
     name: "Maison Lumière",

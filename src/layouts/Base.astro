@@ -3,6 +3,7 @@ import { site } from "../config/site";
 import { image } from "../lib/images";
 import { openingHoursSpecification, priceRange } from "../lib/hours";
 import { instagramUrl } from "../lib/whatsapp";
+import { isDemo } from "../lib/demo";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import WhatsAppFab from "../components/WhatsAppFab.astro";
@@ -16,12 +17,18 @@ interface Props {
   noindex?: boolean;
 }
 
-const { title, description, noindex = false } = Astro.props;
+// The demo is kept out of search entirely: a fictional salon should not
+// compete for real local searches.
+const { title, description, noindex = isDemo } = Astro.props;
 
 const pageTitle = title ?? site.seo.title;
 const pageDescription = description ?? site.seo.description;
-const canonical = new URL(Astro.url.pathname, site.seo.siteUrl).href;
-const ogImage = new URL(site.seo.ogImage, site.seo.siteUrl).href;
+// Astro.site is the configured origin, which SITE_URL may have overridden, so
+// canonical tags and the OG image follow the address the build is actually
+// deployed to rather than whatever the config happens to say.
+const origin = Astro.site?.href ?? site.seo.siteUrl;
+const canonical = new URL(Astro.url.pathname, origin).href;
+const ogImage = new URL(site.seo.ogImage, origin).href;
 
 // Written onto <html> so every Tailwind colour utility resolves from the config.
 // See the @theme inline block in src/styles/global.css for the mapping.
@@ -41,17 +48,18 @@ const brandVars = [
 // rating while telling Google exactly what kind of business this is.
 // Google requires structured data to describe content that is actually on the
 // page, so reviews are only declared when the testimonials section is shown.
-const showReviews = site.sections.testimonials && site.testimonials.length > 0;
+const showReviews =
+  !isDemo && site.sections.testimonials && site.testimonials.length > 0;
 const ratings = showReviews ? site.testimonials.map((t) => t.rating) : [];
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "BeautySalon",
-  "@id": `${site.seo.siteUrl}/#business`,
+  "@id": `${origin}#business`,
   name: site.business.name,
   description: site.seo.description,
-  url: site.seo.siteUrl,
+  url: origin,
   image: ogImage,
-  logo: new URL(image(site.business.logo).src, site.seo.siteUrl).href,
+  logo: new URL(image(site.business.logo).src, origin).href,
   telephone: site.contact.phone,
   email: site.contact.email,
   priceRange: priceRange(),

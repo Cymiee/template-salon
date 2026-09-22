@@ -161,6 +161,19 @@ export interface Sections {
 }
 
 export interface SiteConfig {
+  /**
+   * Demo mode, for the public showcase deployment of this template.
+   *
+   * When on, the site is marked `noindex`, robots.txt disallows everything, the
+   * sitemap is suppressed, the rating structured data is dropped (a fictional
+   * salon should not assert a star rating to Google) and the footer says it is a
+   * demo.
+   *
+   * Leave this `false`. The showcase deployment turns it on with a `DEMO=1`
+   * environment variable instead, so that a real client site cloned from this
+   * template can never accidentally inherit a `noindex`.
+   */
+  demo: boolean;
   business: Business;
   brand: Brand;
   fonts: Fonts;
