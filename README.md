@@ -72,7 +72,7 @@ Work top to bottom. Roughly 60–90 minutes once you have the client's content.
 ### 1. Start the project
 
 ```bash
-npx degit YOUR-USERNAME/salon-template client-name
+npx degit Cymiee/template-salon client-name
 cd client-name
 npm install
 git init && git add -A && git commit -m "Initial commit from template"
