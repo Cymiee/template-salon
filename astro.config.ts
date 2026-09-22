@@ -13,8 +13,9 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   build: {
-    // One stylesheet in the <head> beats several render-blocking requests on 4G.
-    inlineStylesheets: "auto",
+    // Inline the CSS rather than shipping a separate render-blocking request.
+    // The whole site's stylesheet is a few KB, so this is strictly faster on 4G.
+    inlineStylesheets: "always",
   },
   image: {
     // Modern formats first; Astro falls back to the original for old browsers.

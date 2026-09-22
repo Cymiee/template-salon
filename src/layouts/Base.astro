@@ -39,7 +39,10 @@ const brandVars = [
 
 // BeautySalon is a LocalBusiness subtype, so it inherits address, hours and
 // rating while telling Google exactly what kind of business this is.
-const ratings = site.testimonials.map((t) => t.rating);
+// Google requires structured data to describe content that is actually on the
+// page, so reviews are only declared when the testimonials section is shown.
+const showReviews = site.sections.testimonials && site.testimonials.length > 0;
+const ratings = showReviews ? site.testimonials.map((t) => t.rating) : [];
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "BeautySalon",
@@ -90,17 +93,19 @@ const jsonLd = {
       worstRating: 1,
     },
   }),
-  review: site.testimonials.map((t) => ({
-    "@type": "Review",
-    author: { "@type": "Person", name: t.name },
-    reviewRating: {
-      "@type": "Rating",
-      ratingValue: t.rating,
-      bestRating: 5,
-      worstRating: 1,
-    },
-    reviewBody: t.text,
-  })),
+  ...(showReviews && {
+    review: site.testimonials.map((t) => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: t.name },
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: t.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      reviewBody: t.text,
+    })),
+  }),
 };
 ---
 
@@ -133,11 +138,29 @@ const jsonLd = {
     <meta name="twitter:description" content={pageDescription} />
     <meta name="twitter:image" content={ogImage} />
 
-    <!-- Fonts come from one config string. preconnect shaves the extra DNS +
-         TLS round trip that a cold 4G connection would otherwise pay. -->
+    <!--
+      Fonts come from one config string. preconnect shaves the DNS + TLS round
+      trip a cold 4G connection would otherwise pay.
+
+      The stylesheet is loaded without blocking the first paint: `media="print"`
+      makes the browser fetch it at low priority and not wait for it, and the
+      onload handler promotes it to `all` once it arrives. Combined with
+      `display=swap` in the URL, text paints immediately in the fallback face
+      and swaps when the webfont lands. The <noscript> copy keeps the fonts
+      working when scripts are off.
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href={site.fonts.googleFontsUrl} />
+    <link rel="preload" as="style" href={site.fonts.googleFontsUrl} />
+    <link
+      rel="stylesheet"
+      href={site.fonts.googleFontsUrl}
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href={site.fonts.googleFontsUrl} />
+    </noscript>
 
     <script
       type="application/ld+json"
