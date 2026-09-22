@@ -8,8 +8,14 @@ const label = `Book ${site.business.name} on WhatsApp`;
 ---
 
 <!--
-  Floating booking button. `bottom` uses the iOS safe-area inset so it clears the
-  home indicator on notched phones instead of sitting under it.
+  Floating booking button.
+
+  The green is WhatsApp's own brand colour and is deliberately the one hard-coded
+  hex in the components — people recognise the button by that green, so it should
+  not follow the client's palette.
+
+  `bottom` uses the iOS safe-area inset so the button clears the home indicator
+  on notched phones instead of sitting under it.
 -->
 <a
   href={href}
