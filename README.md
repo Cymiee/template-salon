@@ -196,11 +196,20 @@ npm run build && npm run preview
 
    | Type | Name | Value |
    |---|---|---|
-   | `A` | `@` | `76.76.21.21` |
+   | `A` | `@` | `216.198.79.1` |
    | `CNAME` | `www` | `cname.vercel-dns.com` |
 
-   Use the values Vercel shows you — they occasionally change.
-3. DNS takes 10 minutes to 48 hours. Vercel issues the HTTPS certificate itself.
+   **Always use the values Vercel shows you on the day** — it is expanding its IP
+   range, so published values go stale. `76.76.21.21` and `cname.vercel-dns.com`
+   are the older records and still work.
+3. DNS takes 10 minutes to 48 hours. Until it resolves, Vercel shows *Invalid
+   Configuration* — that is the expected state while you wait, not an error you
+   need to fix. Vercel issues the HTTPS certificate itself once the domain
+   verifies.
+
+   On a `.app`, `.dev` or `.page` domain, HTTPS is mandatory (they are HSTS
+   preloaded), so the site will look broken until that certificate is issued.
+   Give it time before assuming something is wrong.
 4. Once live, set `seo.siteUrl` to the real domain, commit and push. This is what
    canonical URLs, `robots.txt`, the sitemap and the share preview all key off, so
    **don't skip it.**
@@ -239,9 +248,14 @@ environment variables** in the Vercel project (Settings → Environment Variable
 | Variable | Value |
 |---|---|
 | `DEMO` | `1` |
-| `SITE_URL` | your deployment's URL, e.g. `https://template-salon.vercel.app` |
+| `SITE_URL` | the URL the demo is actually served on, with `https://` and no trailing slash |
 
 Redeploy after adding them.
+
+**If you later put a custom domain on the demo, update `SITE_URL` to match and
+redeploy.** This is a static build: the canonical tag and the Open Graph image
+URL are written into the HTML when it builds, so changing the domain in Vercel's
+dashboard alone leaves the old address baked into the pages.
 
 `DEMO=1` does four things, all of them about not lying to Google or to visitors:
 
